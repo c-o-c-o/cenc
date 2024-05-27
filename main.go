@@ -64,10 +64,18 @@ func convertEncodeFile(senc string, denc string, path string) error {
 
 	if senc == "auto" {
 		detector := chardet.NewTextDetector()
-		r, _ := detector.DetectBest(bin)
-		senc = strings.ToLower(r.Charset)
-		senc = strings.Replace(senc, "_", "-", -1)
-		if !ValidEncodes(senc) {
+		rs, _ := detector.DetectAll(bin)
+
+		for _, r := range rs {
+			candidate := strings.ToLower(r.Charset)
+			candidate = strings.Replace(candidate, "_", "-", -1)
+			if ValidEncodes(candidate) {
+				senc = candidate
+				break
+			}
+		}
+
+		if senc == "auto" {
 			return errors.New("file character code is not supported")
 		}
 	}
