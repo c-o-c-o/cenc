@@ -1,14 +1,18 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"os"
 	"slices"
+	"strings"
 
 	"github.com/samber/lo"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
+
+	"github.com/saintfish/chardet"
 )
 
 func main() {
@@ -41,7 +45,7 @@ func main() {
 }
 
 func ValidEncodes(encs ...string) bool {
-	list := []string{"utf-8", "shift-jis"}
+	list := []string{"auto", "utf-8", "shift-jis"}
 
 	for _, e := range encs {
 		if slices.Contains(list, e) {
@@ -56,6 +60,16 @@ func convertEncodeFile(senc string, denc string, path string) error {
 	bin, err := os.ReadFile(path)
 	if err != nil {
 		return err
+	}
+
+	if senc == "auto" {
+		detector := chardet.NewTextDetector()
+		r, _ := detector.DetectBest(bin)
+		senc = strings.ToLower(r.Charset)
+		senc = strings.Replace(senc, "_", "-", -1)
+		if !ValidEncodes(senc) {
+			return errors.New("file character code is not supported")
+		}
 	}
 
 	sbin, err := convertString(senc, bin, Decode)
@@ -90,8 +104,8 @@ func convertString(enc string, bin []byte, convert ConvertEnum) ([]byte, error) 
 
 	t := lo.Ternary[transform.Transformer](
 		convert == Encode,
-		japanese.ShiftJIS.NewEncoder(),
-		japanese.ShiftJIS.NewDecoder())
+		convs[enc].NewEncoder(),
+		convs[enc].NewDecoder())
 
 	s, _, err := transform.Bytes(t, bin)
 	return s, err

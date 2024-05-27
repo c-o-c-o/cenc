@@ -11,7 +11,7 @@ shift-jis
 ```
 cenc.exe [file code] [out code] [file path]
 file code
-  ファイルの文字コード [utf-8 | shift-jis]
+  ファイルの文字コード [auto | utf-8 | shift-jis]
 
 out code
   変換先の文字コード [utf-8 | shift-jis]
