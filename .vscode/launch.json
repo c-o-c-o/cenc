@@ -10,7 +10,7 @@
       "request": "launch",
       "mode": "auto",
       "program": ".",
-      "args": ["utf-8", "shift-jis", "test.txt"]
+      "args": ["utf-8", "shift-jis", "test/test.txt"]
     }
   ]
 }
